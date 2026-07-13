@@ -1,22 +1,22 @@
 # printproxy
 
-Prints Windows proxy settings as POSIX-shell `export` lines. Designed for
-[busybox-w32](https://frippery.org/busybox/) ash, where sourcing them makes
-tools like `curl`, `git`, and `wget` honor the system proxy.
+Prints the system proxy settings as POSIX-shell `export` lines on Windows
+and macOS, so tools like `curl`, `git`, and `wget` honor them. Originally
+built for [busybox-w32](https://frippery.org/busybox/) ash.
 
 ## Usage
 
 ```sh
-eval "$(printproxy.exe)"
+eval "$(printproxy)"      # or printproxy.exe on Windows
 ```
 
-When the system proxy is disabled, the program prints `unset ...` instead,
-so the same command clears the variables.
+When no proxy is enabled, the program prints `unset ...` instead, so the
+same command clears the variables.
 
 ## Example
 
 ```console
-$ printproxy.exe
+$ printproxy
 export http_proxy='http://127.0.0.1:2080'
 export https_proxy='http://127.0.0.1:2080'
 export ftp_proxy='http://127.0.0.1:2080'

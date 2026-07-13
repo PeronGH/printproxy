@@ -50,7 +50,8 @@ static char *arrayString(CFDictionaryRef dict, CFStringRef key, CFIndex i) {
 import "C"
 
 import (
-	"fmt"
+	"net"
+	"strconv"
 	"unsafe"
 )
 
@@ -74,7 +75,7 @@ func readConfig() (Config, error) {
 		if p == 0 {
 			return C.GoString(cHost)
 		}
-		return fmt.Sprintf("%s:%d", C.GoString(cHost), p)
+		return net.JoinHostPort(C.GoString(cHost), strconv.Itoa(p))
 	}
 
 	cfg := Config{

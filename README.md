@@ -23,16 +23,25 @@ export ftp_proxy='http://127.0.0.1:2080'
 export no_proxy='localhost,127.0.0.1,::1'
 ```
 
-Settings are read from
-`HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings`.
+Settings are read from:
+
+- **Windows**: `HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings`
+- **macOS**: `SCDynamicStoreCopyProxies` (SystemConfiguration framework)
 
 ## Install
 
-Grab `printproxy-windows-amd64.exe` (or `-arm64.exe`) from
-[Releases](../../releases/latest) and drop it on your `PATH`.
+Grab the binary for your platform from
+[Releases](../../releases/latest) and drop it on your `PATH`:
+
+- `printproxy-windows-amd64.exe` / `printproxy-windows-arm64.exe`
+- `printproxy-darwin-amd64` / `printproxy-darwin-arm64`
 
 ## Build
 
 ```sh
+# Windows (any host)
 GOOS=windows GOARCH=amd64 go build .
+
+# macOS (requires cgo + Xcode CLT)
+GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build .
 ```

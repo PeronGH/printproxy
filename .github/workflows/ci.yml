@@ -14,7 +14,7 @@ jobs:
           go-version-file: go.mod
       - run: make check
 
-  build:
+  build-windows:
     needs: check
     runs-on: ubuntu-latest
     strategy:
@@ -36,8 +36,34 @@ jobs:
           name: printproxy-windows-${{ matrix.arch }}
           path: printproxy-windows-${{ matrix.arch }}.exe
 
+  build-darwin:
+    needs: check
+    runs-on: macos-26
+    strategy:
+      matrix:
+        include:
+          - { arch: amd64, carch: x86_64 }
+          - { arch: arm64, carch: arm64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build printproxy for darwin/${{ matrix.arch }}
+        env:
+          GOOS: darwin
+          GOARCH: ${{ matrix.arch }}
+          CGO_ENABLED: "1"
+          CGO_CFLAGS: -arch ${{ matrix.carch }}
+          CGO_LDFLAGS: -arch ${{ matrix.carch }}
+        run: go build -trimpath -ldflags="-s -w" -o printproxy-darwin-${{ matrix.arch }} .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: printproxy-darwin-${{ matrix.arch }}
+          path: printproxy-darwin-${{ matrix.arch }}
+
   release:
-    needs: build
+    needs: [build-windows, build-darwin]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -47,7 +73,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
-          pattern: printproxy-windows-*
+          pattern: printproxy-*
           merge-multiple: true
       - name: Determine next version tag
         id: tag
@@ -68,4 +94,6 @@ jobs:
             --title "${{ steps.tag.outputs.tag }}" \
             --generate-notes \
             printproxy-windows-amd64.exe \
-            printproxy-windows-arm64.exe
+            printproxy-windows-arm64.exe \
+            printproxy-darwin-amd64 \
+            printproxy-darwin-arm64

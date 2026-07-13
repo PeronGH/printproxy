@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: make check
+
+  release:
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build printproxy for windows/amd64
+        env:
+          GOOS: windows
+          GOARCH: amd64
+          CGO_ENABLED: "0"
+        run: go build -trimpath -ldflags="-s -w" -o printproxy-windows-amd64.exe .
+      - name: Determine next version tag
+        id: tag
+        run: |
+          latest=$(git tag -l 'v[0-9]*' | awk '/^v[0-9]+$/' | sort -V | tail -n 1)
+          if [ -z "$latest" ]; then
+            next=v1
+          else
+            next=v$((${latest#v} + 1))
+          fi
+          echo "tag=$next" >>"$GITHUB_OUTPUT"
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.tag.outputs.tag }}" \
+            --target "$GITHUB_SHA" \
+            --title "${{ steps.tag.outputs.tag }}" \
+            --generate-notes \
+            printproxy-windows-amd64.exe

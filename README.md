@@ -6,12 +6,20 @@ built for [busybox-w32](https://frippery.org/busybox/) ash.
 
 ## Usage
 
+POSIX shells (bash, ash, zsh, …):
+
 ```sh
 eval "$(printproxy)"      # or printproxy.exe on Windows
 ```
 
-When no proxy is enabled, the program prints `unset ...` instead, so the
-same command clears the variables.
+PowerShell:
+
+```powershell
+printproxy.exe -shell pwsh | Invoke-Expression
+```
+
+When no proxy is enabled, the program prints `unset` / `Remove-Item` lines
+instead, so the same command clears the variables.
 
 ## Example
 

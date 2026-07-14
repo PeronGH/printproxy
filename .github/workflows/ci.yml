@@ -5,17 +5,30 @@ on:
     branches: [main]
 
 jobs:
-  check:
+  fmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: make check
+      - run: make fmt-check
+
+  check:
+    strategy:
+      matrix:
+        os: [macos-26, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - shell: bash
+        run: make vet test
 
   build-windows:
-    needs: check
+    needs: [fmt, check]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,7 +50,7 @@ jobs:
           path: printproxy-windows-${{ matrix.arch }}.exe
 
   build-darwin:
-    needs: check
+    needs: [fmt, check]
     runs-on: macos-26
     strategy:
       matrix:

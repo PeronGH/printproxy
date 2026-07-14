@@ -1,14 +1,15 @@
-.PHONY: fmt lint test check
+.PHONY: fmt fmt-check vet test check
 
 fmt:
 	gofmt -w .
 
-lint:
+fmt-check:
 	test -z "$$(gofmt -l .)"
-	GOOS=windows go vet ./...
-	GOOS=darwin go vet ./...
+
+vet:
+	go vet ./...
 
 test:
 	go test ./...
 
-check: lint test
+check: fmt-check vet test

@@ -57,7 +57,7 @@ import (
 
 func readConfig() (Config, error) {
 	dict := C.copyProxies()
-	if unsafe.Pointer(dict) == nil {
+	if dict == 0 {
 		return Config{}, nil
 	}
 	defer C.CFRelease(C.CFTypeRef(dict))

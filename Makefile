@@ -1,13 +1,12 @@
 .PHONY: fmt lint test check
 
-export GOOS=windows
-
 fmt:
 	gofmt -w .
 
 lint:
 	test -z "$$(gofmt -l .)"
-	go vet ./...
+	GOOS=windows go vet ./...
+	GOOS=darwin go vet ./...
 
 test:
 	go test ./...
